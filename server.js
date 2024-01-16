@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
+const cors = require('cors');
+const formatMessage = require('./utils/messages');
 
 dotenv.config();
 const app = express();
@@ -19,25 +21,36 @@ const peopleRoute = require('./routes/people');
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors({
+    methods: 'GET,POST,HEAD,PUT,PATCH,DELETE',
+    origin: '*',
+    optionsSuccessStatus: 200
+}))
 
 app.use('/api', peopleRoute);
 app.use('/api/auth', userRoute);
 
+const botName = 'ChatChord Bot';
+
 //Run when client connects
 io.on('connection', (socket) => {
-    socket.emit('message', 'Welcome to ChatCord!');
+    socket.on('joinRoom', ({ username, room }) => {
+        
+    })
 
-    socket.broadcast.emit('message', 'A user joined a chat!');
+    socket.emit('message', formatMessage(botName, 'Welcome to ChatChord!'));
+
+    socket.broadcast.emit('message', formatMessage(botName, 'A user joined a chat!'));
 
     socket.on('disconnect', () => {
-        io.emit('message', 'A user left the chat');
+        io.emit('message', formatMessage(botName, 'A user left the chat'));
     });
 
     //listen for chat message
     socket.on('chatMessage', (msg) => {
-        io.emit('message', msg);
+        io.emit('message', formatMessage('USER', msg));
     })
-})
+});
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
