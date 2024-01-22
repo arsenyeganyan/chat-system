@@ -5,7 +5,7 @@ form.addEventListener('submit', async function(event) {
     var username = form.username.value;
     var password = form.password.value;
 
-    var url = '';
+    var url = '/api/auth/login';
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -17,11 +17,12 @@ form.addEventListener('submit', async function(event) {
         }),
     })
     
-    const responseData = await response.json(); 
+    const responseData = await response.json();
     const token = responseData.token;
+    console.log(token);
     if (token){
         localStorage.setItem('token', token);
-        window.location.href = '/home.html';
+        window.location.href = '/';
     }
     else {
         var error = document.getElementById('error__msg');

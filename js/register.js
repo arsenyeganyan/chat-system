@@ -18,26 +18,30 @@ form.addEventListener('submit', async function(event) {
         error_msg.innerHTML = '';
     }
 
-    var url = '';
+    var url = '/api/auth/create-user';
     var response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            username: username,
+            name: username,
             email: email,
             password: password,
         }),
     });
 
     var responseData = await response.json();
-    var code = responseData.code;
+
+    var code = responseData.confirmation;
+    console.log('Code: ', code);
+
     localStorage.setItem('code', code);
     localStorage.setItem('username', username);
+    
     form.style.display = 'none';
     code_form.style.display = 'flex';
-    document.getElementById('login__text').innerHTML = 'User Code'
+    document.getElementById('login__text').innerHTML = 'User Code';
 })
 
 code_form.addEventListener('submit', async function(event) {
@@ -49,19 +53,19 @@ code_form.addEventListener('submit', async function(event) {
         return;
     }
 
-    var url = '';
+    var url = '/api/auth/create-user';
     var response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            username: localStorage.getItem('username'),
-            verified: true,
+            name: localStorage.getItem('username'),
+            confirm: true,
         }),
     });
 
     if (response.ok) {
-        window.location.href = '/home.html';
+        window.location.href = '/login';
     }
 });
