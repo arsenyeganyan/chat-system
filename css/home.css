@@ -1,5 +1,10 @@
 @import url("base.css");
 
+p {
+    padding: 0;
+    margin: 0;
+}
+
 .main__box {
     width: 90vw;
     height: 90vh;
@@ -8,6 +13,33 @@
     background-color: var(--main-box-color);
 }
 
+:root {
+    --edit-profile-picture-color: rgb(84 101 111 / 60%);
+}
+
+.inform__messages {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+}
+
+.inform__message {
+    opacity: 0.8;
+    width: 350px;
+    height: 60px;
+    border-radius: 5px;
+}
+
+.success__message {
+    display: none;
+    background-color: green;
+}
+
+.error__message {
+    display: none;
+    background-color: red;
+}
 
 .sidebar {
     float: left;
@@ -25,6 +57,10 @@
     padding: 10px 16px;
     border-right: 1px solid var(--user-data-border-color);
     background-color: var(--main-box-color);
+}
+
+#user__pic {
+    cursor: pointer;
 }
 
 .profile__picture {
@@ -301,3 +337,124 @@
     background-color: var(--sidebar-background-color);
     margin-right: auto;
 }
+
+.user__edit {
+    display: none;
+    flex-direction: column;
+    float: left;
+    width: 25%;
+    height: 100%;
+    background-color: var(--main-box-color);
+}
+
+.arrow__left {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+}
+
+.user__edit header {
+    color: white;
+    display: flex;
+    align-items: flex-end;
+    flex-direction: row;
+    height: 15vh;
+    width: 100%;
+    padding-left: 10px;
+    padding-bottom: 5px;
+    font-size: 18px;
+    background-color: var(--edit-user-header-background-color);
+}
+
+.main__edit {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+}
+
+.profile__picture__label {
+    display: flex;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto;
+    padding: 0 25px;
+    color: white;
+    background:
+        linear-gradient(
+            var(--edit-profile-picture-color),
+            var(--edit-profile-picture-color)),
+        url('../img/[removal.ai]_cb530dbb-90ac-4ea4-81cb-53aa823bde6e-user2.png');
+    background-size: cover;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.profile__picture__label:hover {
+    filter: brightness(70%);
+}
+
+#pic__label {
+    display: none;
+}
+
+.label__detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.edit__username {
+    margin-top: 20px;
+    background-color: white;
+    color: var(--search-text-color);
+}
+
+.label__username {
+    padding: 7px 10px;
+    font-size: 14px;
+    color: var(--secondary-text-color);
+}
+
+.edit__username input {
+    width: 100%;
+    padding: 7px 10px;
+    padding-top: 0;
+    font-size: 16px;
+    border: none;
+    transition: 0.3s;
+}
+
+.edit__username input:focus {
+    outline: none !important;
+    border-bottom: 1px solid var(--button-background-color) ;
+}
+
+.edit__warning {
+    margin-top: 10px;
+    padding-right: 20px;
+    padding-left: 3px;
+    font-size: 11px;
+    color: var(--secondary-text-color);
+}
+
+.submit__changes {
+    position: absolute;
+    height: 30px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: var(--button-background-color); 
+    bottom: 3vh;
+    right: 1vw;
+    transition: 0.3s;
+}
+
+.submit__changes:hover {
+    box-shadow: 10px 10px 100px var(--button-background-hover-color) inset;
+}
+

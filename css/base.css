@@ -5,6 +5,10 @@ html {
     box-sizing: inherit;
 }
 
+input {
+    cursor: pointer;
+}
+
 body {
     margin: 0;
     font-family: sans-serif;
@@ -20,6 +24,9 @@ body {
     --secondary-text-color: #667781;
     --border-bottom-color:  #83f9df;
     --send-message-background-color: rgb(217, 253, 211, 0.6);
+    --edit-user-header-background-color: #008069;
+    --button-background-color: rgb(140, 188, 52);
+    --button-background-hover-color: rgb(97, 130, 34);
 }
 
 .main__background {
