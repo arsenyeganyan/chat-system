@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -13,28 +14,27 @@ const generateRandomCode = () => {
     return code;
 };
 
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
     try {
         if(req.body.confirm) {
             const name = req.body.name;
             await User.updateOne(
                 { name: name },
-                { $set: { verfied: true } }
+                { $set: { verified: true } }
             );
 
             res.status(200).json({ msg: 'Confirmation successful!' });
         } else {
-            const { name, password, email } = req.body;
+            const { name, email, password } = req.body;
         
-            const checkUser = await User.findOne({ name });
+            const checkUser = await User.findOne({ name, verified: true });
             if(checkUser) {
-                res.status(409).json({ msg: 'User with such name already exists!' });
-                return;
+                return res.status(409).json({ msg: 'User with such name already exists!' });
             }
             
             const hashedPassword = await bcrypt.hash(password, 10);
             
-            const newUser = new User({ name, password: hashedPassword, verfied: false });
+            const newUser = new User({ name, password: hashedPassword, verified: false });
             await newUser.save();
             
             const confirmation = generateRandomCode();
@@ -77,18 +77,22 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ name: username, verified: true });
 
         if(!user) {
-            res.status(401).json({ error: 'Invalid credentials!' });
+            return res.status(401).json({ error: 'Invalid credentials!' });
         }
 
-        const passwordsMatch = bcrypt.compare(password, user.password);
+        const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if(passwordsMatch) {
-            const token = jwt.sign({ userId: user._id }, 'signup_key', { expiresIn: '24h' });
+            const randId = crypto.randomUUID();
+            console.log('randId', randId);
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
-            res.status(200).json({ token });
+            req.session.token = token;
+            req.session.randId = randId;
+            return res.status(200).json({ token, randId });
         } else {
             res.status(401).json({ error: 'Invalid credentials!' });
         }
