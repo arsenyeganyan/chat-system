@@ -9,6 +9,10 @@ const session = require('express-session');
 const cors = require('cors');
 const { deleteUsers } = require('./utils/deleteUsers');
 
+//socket utils
+const { messageSent } = require('./utils/chat');
+const { getAllChats } = require('./utils/getAllChats');
+
 //middleware import
 const isAuthenticated = require('./middleware/protected');
 const isLogged = require('./middleware/isLogged');
@@ -66,9 +70,13 @@ app.get('/signup', (req, res) => {
 io.on('connection', (socket) => {
     console.log('Socket connection set..');
 
-    socket.on((msg) => {
+    //message being saved
+    socket.on('message sent', (sender, receiver, msg) => {
+        messageSent(sender, receiver, msg);
+    });
 
-    })
+    //display chats
+    socket.emit('chats', getAllChats());
 });
 
 //Run when client connects
@@ -134,3 +142,5 @@ const PORT = process.env.PORT || 4400;
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 })
+
+module.exports = app;
