@@ -9,6 +9,7 @@ form.addEventListener('submit', async function(event) {
     var email = form.email.value;
     var password = form.password.value;
     var repassword = form.repassword.value;
+    var csrf_token = form._csrf.value;
 
     if (password != repassword){
         error_msg.innerHTML = 'Passwords dont match';
@@ -23,6 +24,7 @@ form.addEventListener('submit', async function(event) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRF-Token': csrf_token,
         },
         body: JSON.stringify({
             username: username,
@@ -44,6 +46,7 @@ code_form.addEventListener('submit', async function(event) {
     event.preventDefault();
 
     var code = code_form.code.value;
+    var csrf_token = code_form._csrf.value;
     if (code != localStorage.getItem('code')) {
         error_msg.innerHTML = 'Invalid Code';
         return;
@@ -54,6 +57,7 @@ code_form.addEventListener('submit', async function(event) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRF-Token': csrf_token,
         },
         body: JSON.stringify({
             username: localStorage.getItem('username'),

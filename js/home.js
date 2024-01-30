@@ -10,7 +10,8 @@ var error_message = document.getElementById('error__message');
 var cancel_icons = document.getElementsByClassName('cancel__icon');
 var new_chat = document.getElementById('new__chat');
 var sidebar_settings = document.getElementById('sidebar__settings');
-chat_box_header_settings = document.getElementById('chat__box__header__settings');
+var chat_box_header_settings = document.getElementById('chat__box__header__settings');
+var profile__picture__label =  document.getElementById('profile__picture__label');
 
 document.getElementById('sidebar__settings__icon').addEventListener('click', function(){
     if (sidebar_settings.style.display == 'flex'){
@@ -41,8 +42,25 @@ document.getElementById('new__chat__icon').addEventListener('click', function() 
 })
 
 document.getElementById('user__edit__close').addEventListener('click', function(){
+    var profile_picture_url = localStorage.getItem('profile_picture');
+    if (profile_picture_url){
+        profile__picture__label.style.backgroundImage = `url(${profile_picture_url})`;
+    }
+    else {
+        profile__picture__label.style.backgroundImage = "url('../img/[removal.ai]_cb530dbb-90ac-4ea4-81cb-53aa823bde6e-user2.png')";
+    }
     user_edit.style.display = 'none';
     sidebar.style.display = 'flex';
+})
+
+document.getElementById('pic__label').addEventListener('input', function(){
+    var file = this.files[0];
+
+    const render = new FileReader();
+    render.onloadend = function(){
+        profile__picture__label.style.backgroundImage = `url(${render.result})`;
+    };
+    render.readAsDataURL(file); 
 })
 
 document.getElementById('user__pic').addEventListener('click', function(){
@@ -50,6 +68,10 @@ document.getElementById('user__pic').addEventListener('click', function(){
     user_edit.style.display = 'flex';
     
     var username = localStorage.getItem('username');
+    var profile_picture_url = localStorage.getItem('profile_picture');
+    if (profile_picture_url){
+        profile__picture__label.style.backgroundImage = `url(${profile_picture_url})`;
+    }
     document.getElementById('edit__username__input').value = username;
 })
 
@@ -57,6 +79,7 @@ edit_form.addEventListener('submit', async function(event) {
     event.preventDefault();
     var profile_picture = edit_form.profile_picture;
     var username = edit_form.username.value;
+    var csrf_token = edit_form._csrf.value;
     
     var formData = new FormData();
     formData.append('profile_picture', profile_picture);
@@ -64,6 +87,9 @@ edit_form.addEventListener('submit', async function(event) {
 
     var url = '';
     var response = await fetch(url, {
+        headers: {
+            'X-CSRF-Token': csrf_token,
+        },
         method: 'POST',
         body: formData,
     })

@@ -5,15 +5,15 @@ form.addEventListener('submit', async function(event) {
     try {
         event.preventDefault();
         var username = form.username.value;
-        console.log(username);
         var password = form.password.value;
-        console.log(password);
+        var csrf_token = form._csrf.value;
 
         var url = '/api/auth/login';
         const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                'X-CSRF-Token': csrf_token,
             },
             body: JSON.stringify({
                 username: username,

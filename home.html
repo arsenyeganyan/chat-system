@@ -24,7 +24,6 @@
             </header>
             <form class="new__chat__search">
                 <img src="img/search.png" class="new__chat__search__logo" alt="Search Icon">
-                <input type="hidden" name="_csrf" value="<%= csrf_token %>">
                 <input type="text" class="new__chat__search__input" placeholder="Search chat or new chat">
             </form>
             <div class="add__group">
@@ -100,7 +99,6 @@
                         <input type="text" id="edit__username__input" name="username">
                     </div>
                     <p class="edit__warning">Its not your username or PIN-code. Its the first name which will show to other users</p>
-                    <input type="hidden" name="_csrf" value="<%= csrf_token %>">
                     <button class="submit__changes">Submit changes</button>
                 </form>
             </div>
@@ -127,7 +125,6 @@
             <div class="search">
                 <form class="search__form">
                     <button><img src="img/search.png" class="search__logo" alt="Search Icon"></button>
-                    <input type="hidden" name="_csrf" value="<%= csrf_token %>">
                     <input type="text" class="search__input" placeholder="Search chat or new chat">
                 </form>
                 <a href="#"><img src="img/alignment.png" class="filter__logo" alt="Filter Logo"></a>
@@ -214,7 +211,6 @@
                 <a href="#"><img src="img/plus.png" class="chat__box__footer__icon" alt="File Load Button"></a>
                 <form class="message__form">
                     <textarea name="message"></textarea>
-                    <input type="hidden" name="_csrf" value="<%= csrf_token %>">
                 </form>
                 <a href="#"><img src="img/microphone.png" class="chat__box__footer__icon" alt="Speech To Text"></a>
             </footer>
