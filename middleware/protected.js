@@ -2,7 +2,8 @@ const isAuthenticated = (req, res, next) => {
     if (req.session && req.session.token) {
       return next();
     } else {
-      return res.status(401).json({ message: 'Unauthorized' });
+      console.log("Redirecting to /login because session or token is missing");
+      return res.redirect('/login');
     }
 };
 

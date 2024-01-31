@@ -26,5 +26,5 @@ describe('API tests', () => {
 
             expect(res.status).toBe(409);
             expect(res.body.msg).toEqual('User with such name already exists!');
-    })
+    });
 });

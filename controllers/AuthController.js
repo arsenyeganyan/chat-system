@@ -2,7 +2,6 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
 const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -86,13 +85,10 @@ exports.login = async (req, res) => {
         const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if(passwordsMatch) {
-            const randId = crypto.randomUUID();
-            console.log('randId', randId);
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
             req.session.token = token;
-            req.session.randId = randId;
-            return res.status(200).json({ token, randId });
+            return res.status(200).json({ token });
         } else {
             res.status(401).json({ error: 'Invalid credentials!' });
         }

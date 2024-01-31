@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         default: Date.now(),
         required: [true, 'date of creation must be provided'],
     },
-    rooms: {
+    chats: {
         type: Array,
         required: [true, 'rooms list must be provided'],
     },

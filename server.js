@@ -9,9 +9,12 @@ const session = require('express-session');
 const cors = require('cors');
 const { deleteUsers } = require('./utils/deleteUsers');
 
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
 //socket utils
-const { messageSent } = require('./utils/chat');
-const { getAllChats } = require('./utils/getAllChats');
+// const { messageSent } = require('./utils/chat');
+// const { getAllChats } = require('./utils/getAllChats');
 
 //middleware import
 const isAuthenticated = require('./middleware/protected');
@@ -24,16 +27,25 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 //middleware
+app.set('view engine', 'ejs');
+
+//session config
 app.use(session({
     secret: 'xoxogoat',
     resave: true,
     saveUninitialized: true,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000
+    }
 }));
 
-app.use('/', express.static(path.join(__dirname, 'public')));
+//other configs
+app.use('/', express.static(path.join(__dirname, 'views')));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
+//cors config
 app.use(cors({
     methods: 'GET,POST,HEAD,PUT,PATCH,DELETE',
     origin: '*',
@@ -41,44 +53,52 @@ app.use(cors({
     credentials: true,
 }));
 
-//routes
+//csrf + protection config
+app.use(csrf({ cookie: true }));
+app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
+//express routes
 const userRoute = require('./routes/authRoutes');
 const editRoute = require('./routes/edit');
 
 app.use('/api/auth', userRoute);
 app.use('/api/edit', isLogged, editRoute);
 
-//user deletion
+//unverified user deletion
 setInterval(() => deleteUsers(), 60 * 60 * 60 * 1000);
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/home.html'));
-})
-
-app.get('/protected', isAuthenticated, (req, res) => {
-    res.json({ msg: 'This route is protected!' });
+//rendering
+app.get('/', isAuthenticated, (req, res) => {
+    res.render('home', { csrfToken: req.csrfToken() });
 })
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/login.html'));
+    res.render('login', { csrfToken: req.csrfToken() });
 })
 
 app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/register.html'));
+    res.render('register', { csrfToken: req.csrfToken() });
 })
 
-io.on('connection', (socket) => {
-    console.log('Socket connection set..');
+//sockets
 
-    //message being saved
-    socket.on('message sent', (sender, receiver, msg) => {
-        messageSent(sender, receiver, msg);
-    });
+//my approach
+// io.on('connection', (socket) => {
+//     console.log('Socket connection set..');
 
-    //display chats
-    socket.emit('chats', getAllChats());
-});
+//     //message being saved
+//     socket.on('message sent', (sender, receiver, msg) => {
+//         messageSent(sender, receiver, msg);
+//     });
 
+//     //display chats
+//     socket.emit('chats', getAllChats());
+// });
+
+//course
 //Run when client connects
 // io.on('connection', (socket) => {
 //     socket.on('joinRoom', ({ username, room }) => {
@@ -130,6 +150,7 @@ io.on('connection', (socket) => {
 //     });
 // });
 
+//connecting to the database
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Connected to the database.');

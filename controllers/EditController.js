@@ -12,10 +12,6 @@ exports.editUsername = async (req, res, next) => {
                 return res.status(401).json({ message: 'Invalid token!' });
             }
 
-            // if(randId !== req.session.randId) {
-            //     return res.status(401).json({ msg: 'Problem authorizing random id!' });
-            // }
-
             const user = await User.findOne({ _id: decoded.userId });
             if(!user) {
                 return res.status(404).json({ msg: 'User not found' });
