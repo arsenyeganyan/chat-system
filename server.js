@@ -8,23 +8,28 @@ const socketio = require('socket.io');
 const session = require('express-session');
 const cors = require('cors');
 const { deleteUsers } = require('./utils/deleteUsers');
-
+const multer = require('multer');
 const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
-
-//socket utils
-// const { messageSent } = require('./utils/chat');
-// const { getAllChats } = require('./utils/getAllChats');
-
-//middleware import
-const isAuthenticated = require('./middleware/protected');
-const isLogged = require('./middleware/isLogged');
 
 //config
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+
+//blob setup
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+//socket utils
+// const { messageSent } = require('./utils/chat');
+// const { getAllChats } = require('./utils/getAllChats'); 
+
+//middleware import
+const isAuthenticated = require('./middleware/protected');
+const isLogged = require('./middleware/isLogged');
+
 
 //middleware
 app.set('view engine', 'ejs');
@@ -44,6 +49,11 @@ app.use('/', express.static(path.join(__dirname, 'views')));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+//multer error handling
+app.use((error, req, res, next) => {
+    console.log('This is the rejected field ->', error.field);
+});
 
 //cors config
 app.use(cors({
@@ -65,10 +75,10 @@ const userRoute = require('./routes/authRoutes');
 const editRoute = require('./routes/edit');
 
 app.use('/api/auth', userRoute);
-app.use('/api/edit', isLogged, editRoute);
+app.use('/api/edit', [isLogged, upload.single('profile__picture')], editRoute);
 
 //unverified user deletion
-setInterval(() => deleteUsers(), 60 * 60 * 60 * 1000);
+setInterval(() => deleteUsers(), 60 * 60 * 1000);
 
 //rendering
 app.get('/', isAuthenticated, (req, res) => {
@@ -98,57 +108,57 @@ app.get('/signup', (req, res) => {
 //     socket.emit('chats', getAllChats());
 // });
 
-//course
-//Run when client connects
-// io.on('connection', (socket) => {
-//     socket.on('joinRoom', ({ username, room }) => {
-//         const user = userJoin(socket.id, username, room);
+// course
+// Run when client connects
+io.on('connection', (socket) => {
+    socket.on('joinRoom', ({ username, room }) => {
+        const user = userJoin(socket.id, username, room);
         
-//         socket.join(user.room);
+        socket.join(user.room);
 
-//         //welcome message
-//         socket.emit('message', formatMessage(botName, 'Welcome to ChatChord!'));
+        //welcome message
+        socket.emit('message', formatMessage(botName, 'Welcome to ChatChord!'));
     
-//         //user joined
-//         socket.broadcast
-//             .to(user.room)
-//             .emit(
-//                 'message', 
-//                 formatMessage(botName, `${user.username} joined chat!`)
-//             );
+        //user joined
+        socket.broadcast
+            .to(user.room)
+            .emit(
+                'message', 
+                formatMessage(botName, `${user.username} joined chat!`)
+            );
 
-//         //get room users
-//         io.to(user.room).emit('roomUsers', {
-//             room: user.room,
-//             users: getRoomUsers(user.room)
-//         })
-//     })
+        //get room users
+        io.to(user.room).emit('roomUsers', {
+            room: user.room,
+            users: getRoomUsers(user.room)
+        })
+    })
 
-//     //listen for chat message
-//     socket.on('chatMessage', (msg) => {
-//         const user = getCurrentUser(socket.id);
+    //listen for chat message
+    socket.on('chatMessage', (msg) => {
+        const user = getCurrentUser(socket.id);
 
-//         io.to(user.room).emit('message', formatMessage(user.username, msg));
-//     })
+        io.to(user.room).emit('message', formatMessage(user.username, msg));
+    })
 
-//     //disconnect
-//     socket.on('disconnect', () => {
-//         const user = userLeave(socket.id);
+    //disconnect
+    socket.on('disconnect', () => {
+        const user = userLeave(socket.id);
         
-//         if(user) {
-//             io.to(user.room).emit(
-//                 'message', 
-//                 formatMessage(botName, `${user.username} user left the chat`)
-//             );
+        if(user) {
+            io.to(user.room).emit(
+                'message', 
+                formatMessage(botName, `${user.username} user left the chat`)
+            );
 
-//             //get room users
-//             io.to(user.room).emit('roomUsers', {
-//                 room: user.room,
-//                 users: getRoomUsers(user.room)
-//             })
-//         }
-//     });
-// });
+            //get room users
+            io.to(user.room).emit('roomUsers', {
+                room: user.room,
+                users: getRoomUsers(user.room)
+            })
+        }
+    });
+});
 
 //connecting to the database
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

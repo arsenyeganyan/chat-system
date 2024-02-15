@@ -13,7 +13,7 @@ describe('API tests', () => {
         expect(res.status).toBe(200);
         expect(res.body.token).toBeDefined();
         expect(res.body.randId).toBeDefined();
-    });
+    }); 
 
     it('auth/signup should detect an existing user', async () => {
         const res = await request(app)
@@ -24,7 +24,7 @@ describe('API tests', () => {
                 password: process.env.VALID_PASSWORD,
             });
 
-            expect(res.status).toBe(409);
-            expect(res.body.msg).toEqual('User with such name already exists!');
+        expect(res.status).toBe(409);
+        expect(res.body.msg).toEqual('User with such name already exists!');
     });
 });

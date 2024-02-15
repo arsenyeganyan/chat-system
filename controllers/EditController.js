@@ -1,57 +1,86 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const path = require('path');
+const fs = require('fs');
+const random = require('../utils/randNum');
 
-exports.editUsername = async (req, res, next) => {
-    try {
-        const token = req.session.token;
-        const { username } = req.body;
+exports.editUser = (req, res) => {
+    const token = req.session.token;
+    const { username } = req.body;
+    const profile_picture = req.file;
 
-        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-            if(err) {
-                return res.status(401).json({ message: 'Invalid token!' });
-            }
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if(err) {
+            return res.status(401).json({ message: 'Invalid token!' });
+        }
 
-            const user = await User.findOne({ _id: decoded.userId });
-            if(!user) {
-                return res.status(404).json({ msg: 'User not found' });
-            }
+        let updateObj = {};
+        if(username) {
+            updateObj.name = username;
+        }
+        if(profile_picture) {
+            const rand = random(1000, 9999);
+            const savePath = path.join(__dirname, '..', 'media', 'pictures', `${rand}.jpg`);
+            
+            fs.writeFile(savePath, profile_picture.buffer, (err) => {
+                if(err) {
+                    console.log('Error saving file:', err);
+                    return;
+                }
+                
+                console.log('File saved successfully!');
+            });
 
-            user.name = username;
-            await user.save();
+            updateObj.profile_pic = savePath;
+        }
 
-            return res.status(200).json({ msg: 'Username changed successfully!' });
-        })
-    } catch(err) {
-        res.status(500).json({ msg: 'Error while editing user info!' });
-    }
+        User.findByIdAndUpdate(
+            { _id: decoded.userId },
+            { $set: updateObj },
+            { new: true }
+        )
+            .then(updatedPerson => {
+                if(updatedPerson) {
+                    console.log(`User with the id: ${decoded.userId} updated successfully!`);
+                    return res.status(200).json({ msg: 'User data updated successfully!' });
+                } else {
+                    console.log('Could not find user!');
+                    return res.status(404).json({ msg: 'User not found' });
+                }
+            })
+            .catch((err) => {
+                console.log('Error while editing user info: \n', err);
+                return res.status(500).json({ msg: 'Error while editing user info!' });
+            });
+    })
 }
 
-exports.editPassword = async (req, res) => {
-    try {
-        const token = req.session.token;
-        const { old_password, new_password } = req.body;
+// exports.editPassword = async (req, res) => {
+//     try {
+//         const token = req.session.token;
+//         const { old_password, new_password } = req.body;
 
-        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-            if(err) {
-                return res.status(401).json({ message: 'Invalid token!' });
-            }
+//         jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+//             if(err) {
+//                 return res.status(401).json({ message: 'Invalid token!' });
+//             }
 
-            const passwordsMatch = await bcrypt.compare(old_password, oldUser.password);
-            if(passwordsMatch) {
-                const newPassword = await bcrypt.hash(new_password, 10);
+//             const passwordsMatch = await bcrypt.compare(old_password, oldUser.password);
+//             if(passwordsMatch) {
+//                 const newPassword = await bcrypt.hash(new_password, 10);
 
-                await User.updateOne(
-                    { _id: decoded.userId },
-                    { $set: { password: newPassword } }
-                );
+//                 await User.updateOne(
+//                     { _id: decoded.userId },
+//                     { $set: { password: newPassword } }
+//                 );
 
-                return res.status(200).json({ msg: 'Username changed successfully!' });
-            } else {
-                return res.status(401).json({ error: 'Wrong password!' });
-            }
-        })
-    } catch(err) {
-        res.status(500).json({ msg: 'Error while editing user info!' });
-    }
-}
+//                 return res.status(200).json({ msg: 'User password changed successfully!' });
+//             } else {
+//                 return res.status(401).json({ error: 'Wrong password!' });
+//             }
+//         })
+//     } catch(err) {
+//         res.status(500).json({ msg: 'Error while editing user info!' });
+//     }
+// }

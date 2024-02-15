@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const EditController = require('../controllers/EditController');
 
-router.post('/username', EditController.editUsername);
-
-router.post('/password', EditController.editPassword);
+router.post('/user', EditController.editUser);
 
 module.exports = router;
