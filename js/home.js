@@ -16,10 +16,10 @@ var profile__picture__label =  document.getElementById('profile__picture__label'
 document.getElementById('sidebar__settings__icon').addEventListener('click', function(){
     if (sidebar_settings.style.display == 'flex'){
         sidebar_settings.style.display = 'none';
-    }   
+    }  
     else {
         sidebar_settings.style.display = 'flex';
-    }     
+    } 
 })
 
 document.getElementById('chat__box__header__settings__icon').addEventListener('click', function(){
@@ -28,12 +28,12 @@ document.getElementById('chat__box__header__settings__icon').addEventListener('c
     }   
     else {
         chat_box_header_settings.style.display = 'flex';
-    }     
+    }    
 })
 
 document.getElementById('new__chat__close').addEventListener('click', function(){
     new_chat.style.display = 'none';
-    sidebar.style.display = 'flex';    
+    sidebar.style.display = 'flex'
 })
 
 document.getElementById('new__chat__icon').addEventListener('click', function() {
@@ -76,36 +76,48 @@ document.getElementById('user__pic').addEventListener('click', function(){
 })
 
 edit_form.addEventListener('submit', async function(event) {
-    event.preventDefault();
-    var profile_picture = edit_form.profile_picture;
-    var username = edit_form.username.value;
-    var csrf_token = edit_form._csrf.value;
+    try {
+        event.preventDefault();
+        var profile_picture = edit_form.profile__picture;
+        var username = edit_form.username.value;
+        var csrf_token = edit_form._csrf.value;
+
+        const file = profile_picture.files[0];
+        
+        var formData = new FormData();
+        if(file) {
+            formData.append('profile__picture', file);
+        }
+        if(username) {
+            formData.append('username', username);
+        }
     
-    var formData = new FormData();
-    formData.append('profile_picture', profile_picture);
-    formData.append('username', username);
+        var url = '/api/edit/user';
+        var response = await fetch(url, {
+            headers: {
+                'X-CSRF-Token': csrf_token,
+                'Authorization': `Token ${localStorage.getItem('token')}`
+            },
+            method: 'POST',
+            body: formData,
+        });
+        
+        var notification_sound = new Audio('../sounds/new-message-2-125765.mp3');
+        await notification_sound.play();
 
-    var url = '';
-    var response = await fetch(url, {
-        headers: {
-            'X-CSRF-Token': csrf_token,
-        },
-        method: 'POST',
-        body: formData,
-    })
+        if(!response.ok) {
+            error_message.style.display = 'flex';
+            throw new Error("An error occured", response.status);
+        }
+        
+        const responseData = await response.json();
+        console.log(responseData);
 
-    console.log(profile_picture)
-    
-    var notification_sound = new Audio('../sounds/new-message-2-125765.mp3');
-    await notification_sound.play();
-
-    if (response.ok) {
         error_message.style.display = 'none';
         success_message.style.display = 'flex';
-    }
-    else {
-        success_message.style.display = 'none';
-        error_message.style.display = 'flex';
+        return;
+    } catch(err) {
+        console.error(err);
     }
 })
 

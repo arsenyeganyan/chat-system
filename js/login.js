@@ -1,7 +1,9 @@
 var form = document.getElementById('login__form');
+var error = document.getElementById('error__msg');
 
 form.addEventListener('submit', async function(event) {
-    
+    error.innerHTML = 'Loading...';
+
     try {
         event.preventDefault();
         var username = form.username.value;
@@ -29,10 +31,11 @@ form.addEventListener('submit', async function(event) {
             localStorage.setItem('token', token);
             window.location.href = '/';
         } else {
-            var error = document.getElementById('error__msg');
             error.innerHTML = 'Bad username or password';
         }
     } catch(err) {
         console.error(error);
+    } finally {
+        error.innerHTML = '';
     }
 });

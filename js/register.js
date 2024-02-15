@@ -18,9 +18,6 @@ form.addEventListener('submit', async function(event) {
             error_msg.innerHTML = 'Passwords do not match';
             return;
         }
-        else {
-            error_msg.innerHTML = '';
-        }
 
         var url = '/api/auth/create-user';
         var response = await fetch(url, {
