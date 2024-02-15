@@ -29,6 +29,13 @@ body {
     --button-background-hover-color: rgb(97, 130, 34);
 }
 
+.error__msg {
+    color: red;
+    font-size: 13px;
+    margin: 0 auto;
+    padding-bottom: 15px;
+}
+
 .main__background {
     position: fixed;
     top: 0;

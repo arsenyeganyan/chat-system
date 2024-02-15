@@ -42,13 +42,6 @@ svg {
     background-color: var(--main-box-color);
 }
 
-.error__msg {
-    color: red;
-    font-size: 13px;
-    margin: 0 auto;
-    padding-bottom: 15px;
-}
-
 .login__form {
     display: flex;
     flex-direction: column;
