@@ -9,7 +9,6 @@ form.addEventListener('submit', async function(event) {
         var username = form.username.value;
         var password = form.password.value;
         var csrf_token = form._csrf.value;
-
         var url = '/api/auth/login';
         const response = await fetch(url, {
             method: "POST",

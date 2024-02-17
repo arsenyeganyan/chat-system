@@ -24,7 +24,6 @@
             </header>
             <form class="new__chat__search">
                 <img src="img/search.png" class="new__chat__search__logo" alt="Search Icon">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="text" class="new__chat__search__input" placeholder="Search chat or new chat">
             </form>
             <div class="add__group">
@@ -96,8 +95,8 @@
                         <input type="text" class="password__changing__input" name="newPassword" required>
                     </div>
                     <div class="error__msg" id="error__msg__in__change__password">Passwords dont match</div>
-                    <button class="submit__changes">Submit changes</button>
                     <input type="hidden" name="_csrf" value="<%=csrfToken %>">
+                    <button class="submit__changes">Submit changes</button>
                 </form>
             </div>
         </div>
@@ -128,7 +127,7 @@
                         <input type="text" id="edit__username__input" name="username">
                     </div>
                     <p class="edit__warning">Its not your username or PIN-code. Its the first name which will show to other users</p>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="_csrf" value="<%=csrfToken %>">
                     <button class="submit__changes">Submit changes</button>
                 </form>
             </div>
@@ -144,9 +143,9 @@
                     <a><img src="img/dots.png" class="navbar__logo" id="sidebar__settings__icon" alt="Settings"></a>
                     <div class="sidebar__settings" id="sidebar__settings">
                         <nav>
-                            <a href="#">New chat</a>
                             <a href="#" id="settings__new__chat">New chat</a>
                             <a href="#">Select chats</a>
+                            <a href="#" id="settings__change__password">Change password</a>
                             <a href="#">Settings</a>
                             <a href="#" id="log__out">Log out</a>
                         </nav>
@@ -155,8 +154,8 @@
             </div>
             <div class="search">
                 <form class="search__form">
+                    <input type="hidden" name="_csrf" value="<%=csrfToken %>">
                     <button><img src="img/search.png" class="search__logo" alt="Search Icon"></button>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="text" class="search__input" placeholder="Search chat or new chat">
                 </form>
                 <a href="#"><img src="img/alignment.png" class="filter__logo" alt="Filter Logo"></a>
@@ -243,7 +242,6 @@
                 <a href="#"><img src="img/plus.png" class="chat__box__footer__icon" alt="File Load Button"></a>
                 <form class="message__form">
                     <textarea name="message"></textarea>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 </form>
                 <a href="#"><img src="img/microphone.png" class="chat__box__footer__icon" alt="Speech To Text"></a>
             </footer>
