@@ -56,31 +56,39 @@ exports.editUser = (req, res) => {
     })
 }
 
-// exports.editPassword = async (req, res) => {
-//     try {
-//         const token = req.session.token;
-//         const { old_password, new_password } = req.body;
+exports.editPassword = async (req, res) => {
+    try {
+        const token = req.session.token;
+        const { old_password, new_password } = req.body;
 
-//         jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-//             if(err) {
-//                 return res.status(401).json({ message: 'Invalid token!' });
-//             }
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+            if(err) {
+                console.log(err);
+                return res.status(401).json({ message: 'Invalid token or something went wrong!' });
+            }
 
-//             const passwordsMatch = await bcrypt.compare(old_password, oldUser.password);
-//             if(passwordsMatch) {
-//                 const newPassword = await bcrypt.hash(new_password, 10);
+            const user = await User.findById({ _id: decoded.userId });
+            const passToCompare = user.password;
+            console.log(passToCompare);
 
-//                 await User.updateOne(
-//                     { _id: decoded.userId },
-//                     { $set: { password: newPassword } }
-//                 );
+            const matches = await bcrypt.compare(old_password, passToCompare);
+            
+            if(!matches) {
+                console.log(err);
+                return res.status(401).json({ msg: "Passwords do not match! (backend) "});
+            }
 
-//                 return res.status(200).json({ msg: 'User password changed successfully!' });
-//             } else {
-//                 return res.status(401).json({ error: 'Wrong password!' });
-//             }
-//         })
-//     } catch(err) {
-//         res.status(500).json({ msg: 'Error while editing user info!' });
-//     }
-// }
+            const hashedPassword = await bcrypt.hash(new_password, 10);
+
+            await User.updateOne(
+                { _id: decoded.userId },
+                { $set: { password: hashedPassword } }
+            );
+
+            return res.status(200).json({ msg: 'User password changed successfully!' });
+        })
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ msg: 'Error while editing user info!' });
+    }
+}

@@ -58,7 +58,7 @@ app.use((error, req, res, next) => {
 //cors config
 app.use(cors({
     methods: 'GET,POST,HEAD,PUT,PATCH,DELETE',
-    origin: '*',
+    origin: 'http://localhost:4400',
     optionsSuccessStatus: 200,
     credentials: true,
 }));

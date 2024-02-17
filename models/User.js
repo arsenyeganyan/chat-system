@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
+const Joi = require('joi');
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'user name must be provided'],
+        validate: {
+            validator: (value) => Joi.string().validate(value).error === undefined,
+            message: 'Invalid name format'
+        }
     },
     password: {
         type: String,

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const Joi = require('joi');
 
 const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,6 +18,7 @@ exports.createUser = async (req, res, next) => {
     try {
         if(req.body.confirm) {
             const name = req.body.name;
+
             await User.updateOne(
                 { name: name },
                 { $set: { verified: true } }
@@ -25,7 +27,7 @@ exports.createUser = async (req, res, next) => {
             res.status(200).json({ msg: 'Confirmation successful!' });
         } else {
             const { name, email, password } = req.body;
-        
+
             const checkUser = await User.findOne({ name, verified: true });
             if(checkUser) {
                 return res.status(409).json({ msg: 'User with such name already exists!' });
@@ -33,38 +35,61 @@ exports.createUser = async (req, res, next) => {
             
             const hashedPassword = await bcrypt.hash(password, 10);
             
-            const newUser = new User({ name, password: hashedPassword, verified: false });
-            await newUser.save();
-            
-            const confirmation = generateRandomCode();
-
-            const transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: 'kerparvest69@gmail.com',
-                    pass: 'qkvv jlus yaux vpfv '
-                }
-            });
-
-            const mailOptions = {
-                from: 'kerparvest69@gmail.com',
-                to: email,
-                subject: 'Email confirmation',
-                text: `Your confirmation number: ${confirmation}`
+            const userSample = {
+                name: name,
+                password: hashedPassword,
+                verified: false,
             }
 
-            conf = confirmation;
-            
-            const info = await transporter.sendMail(mailOptions);
-
-            console.log('Email sent: ', info.messageId);
-            res.status(201).json({ 
-                msg: 'Email sent!', 
-                confirmation: confirmation,
-                user: name
+            const schema = Joi.object({
+                name: Joi.string().min(4).max(15).required(),
+                password: Joi.string().required(),
+                verified: Joi.boolean().required(),
             });
+
+            const { error, value } = schema.validate(userSample);
+            
+            if(error){
+                console.log(error.details[0].message);
+                return res
+                    .status(400)
+                    .json({
+                        msg: 'Database validation failed, due to wrong details!'
+                    });
+            } else {
+                const newUser = new User(value);
+                await newUser.save();
+                
+                const confirmation = generateRandomCode();
+
+                const transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: 'kerparvest69@gmail.com',
+                        pass: 'qkvv jlus yaux vpfv '
+                    }
+                });
+
+                const mailOptions = {
+                    from: 'kerparvest69@gmail.com',
+                    to: email,
+                    subject: 'Email confirmation',
+                    text: `Your confirmation number: ${confirmation}`
+                }
+
+                conf = confirmation;
+                
+                const info = await transporter.sendMail(mailOptions);
+
+                console.log('Email sent: ', info.messageId);
+                res.status(201).json({ 
+                    msg: 'Email sent!', 
+                    confirmation: confirmation,
+                    user: name
+                });
+            }
         }
     } catch(err) {
         console.log(err);
