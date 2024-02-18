@@ -1,18 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const Joi = require('joi');
-
-const generateRandomCode = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      code += characters.charAt(randomIndex);
-    }
-    return code;
-};
+const generateRandomCode = require('../utils/randCode');
+const sendMail = require('../utils/sendMail');
 
 exports.createUser = async (req, res, next) => {
     try {
@@ -28,21 +19,23 @@ exports.createUser = async (req, res, next) => {
         } else {
             const { name, email, password } = req.body;
 
-            const checkUser = await User.findOne({ name, verified: true });
+            const checkUser = await User.findOne({ name, email, verified: true });
             if(checkUser) {
-                return res.status(409).json({ msg: 'User with such name already exists!' });
+                return res.status(409).json({ msg: 'User already exists!' });
             }
             
             const hashedPassword = await bcrypt.hash(password, 10);
             
             const userSample = {
                 name: name,
+                email: email,
                 password: hashedPassword,
                 verified: false,
             }
 
             const schema = Joi.object({
                 name: Joi.string().min(4).max(15).required(),
+                email: Joi.string(),
                 password: Joi.string().required(),
                 verified: Joi.boolean().required(),
             });
@@ -62,29 +55,12 @@ exports.createUser = async (req, res, next) => {
                 
                 const confirmation = generateRandomCode();
 
-                const transporter = nodemailer.createTransport({
-                    host: 'smtp.gmail.com',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                        user: 'kerparvest69@gmail.com',
-                        pass: 'qkvv jlus yaux vpfv '
-                    }
-                });
+                await sendMail(
+                    `Your email confirmation code: ${confirmation}`,
+                    email
+                );
 
-                const mailOptions = {
-                    from: 'kerparvest69@gmail.com',
-                    to: email,
-                    subject: 'Email confirmation',
-                    text: `Your confirmation number: ${confirmation}`
-                }
-
-                conf = confirmation;
-                
-                const info = await transporter.sendMail(mailOptions);
-
-                console.log('Email sent: ', info.messageId);
-                res.status(201).json({ 
+                res.status(200).json({ 
                     msg: 'Email sent!', 
                     confirmation: confirmation,
                     user: name

@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'user password must be provided'],
     },
+    email: {
+        type: String,
+        required: [true, 'email must be provided'],
+    },
     verified: {
         type: Boolean,
         required: [true, 'user status must be provided'],

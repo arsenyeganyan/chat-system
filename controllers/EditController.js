@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
 const random = require('../utils/randNum');
+const generateRandomCode = require('../utils/randCode');
+const sendMail = require('../utils/sendMail');
 
 exports.editUser = (req, res) => {
     const token = req.session.token;
@@ -75,7 +77,7 @@ exports.editPassword = async (req, res) => {
             
             if(!matches) {
                 console.log(err);
-                return res.status(401).json({ msg: "Passwords do not match! (backend) "});
+                return res.status(401).json({ msg: 'Passwords do not match! (backend) '});
             }
 
             const hashedPassword = await bcrypt.hash(new_password, 10);
@@ -90,5 +92,45 @@ exports.editPassword = async (req, res) => {
     } catch(err) {
         console.error(err);
         res.status(500).json({ msg: 'Error while editing user info!' });
+    }
+}
+
+exports.resetPassword = async (req, res) => {
+    try {
+        if(req.body.new_password) {
+            const { name, new_password } = req.body;
+
+            const hashedPassword = await bcrypt.hash(new_password, 10);
+
+            await User.updateOne(
+                { name: name, verified: true },
+                { $set: { password: hashedPassword } }
+            );
+
+            res.status(200).json({ msg: 'Password reset successfully!' });
+        } else {
+            const { name, email } = req.body;
+    
+            const userFound = User.findOne({ name, email, verified: true });
+            
+            if(!userFound) {
+                res.status(404).json({ msg: 'User not found!' });
+            }
+
+            const code = generateRandomCode();
+            await sendMail(
+                `Your code to reset your password on the chat system app: ${code}`,
+                email
+            );
+
+            res.status(200).json({ 
+                msg: 'Email sent!',
+                confirmation: code,
+                user: name
+            });
+        }
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ msg: "Error while resetting user password!" });
     }
 }
