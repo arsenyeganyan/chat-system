@@ -129,7 +129,7 @@ exports.resetPassword = async (req, res) => {
             });
         }
     } catch(err) {
-        console.log(err);
+        console.error(err);
         res.status(500).json({ msg: "Error while resetting user password!" });
     }
 }
