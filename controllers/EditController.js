@@ -98,23 +98,23 @@ exports.editPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try {
         if(req.body.new_password) {
-            const { name, new_password } = req.body;
+            const { new_password, email } = req.body;
 
             const hashedPassword = await bcrypt.hash(new_password, 10);
 
             await User.updateOne(
-                { name: name, verified: true },
+                { email, verified: true },
                 { $set: { password: hashedPassword } }
             );
 
             res.status(200).json({ msg: 'Password reset successfully!' });
         } else {
-            const { name, email } = req.body;
+            const { email } = req.body;
     
-            const userFound = User.findOne({ name, email, verified: true });
-            
+            const userFound = await User.findOne({ email, verified: true });
             if(!userFound) {
-                res.status(404).json({ msg: 'User not found!' });
+                console.log('User not found!');
+                return res.status(404).json({ msg: 'User not found!' });
             }
 
             const code = generateRandomCode();
@@ -126,11 +126,10 @@ exports.resetPassword = async (req, res) => {
             res.status(200).json({ 
                 msg: 'Email sent!',
                 confirmation: code,
-                user: name
             });
         }
     } catch(err) {
-        console.error(err);
+        console.log(err);
         res.status(500).json({ msg: "Error while resetting user password!" });
     }
 }

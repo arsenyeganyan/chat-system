@@ -51,7 +51,7 @@ exports.createUser = async (req, res, next) => {
                     });
             } else {
                 const newUser = new User(value);
-                await newUser.save();
+                await newUser.save(); 
                 
                 const confirmation = generateRandomCode();
 
@@ -77,10 +77,14 @@ exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const user = await User.findOne({ name: username, verified: true });
+        let user = await User.findOne({ name: username, verified: true });
 
         if(!user) {
-            return res.status(401).json({ error: 'Invalid credentials!' });
+            user = await User.findOne({ email: username, verified: true });
+
+            if(!user) {
+                return res.status(401).json({ error: 'Invalid credentials!' });
+            }
         }
 
         const passwordsMatch = await bcrypt.compare(password, user.password);

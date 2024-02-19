@@ -73,9 +73,11 @@ app.use((req, res, next) => {
 //express routes
 const userRoute = require('./routes/authRoutes');
 const editRoute = require('./routes/edit');
+const resetRoute = require('./routes/resetRoute');
 
 app.use('/api/auth', userRoute);
 app.use('/api/edit', [isLogged, upload.single('profile__picture')], editRoute);
+app.use('/api/reset', resetRoute);
 
 //unverified user deletion
 setInterval(() => deleteUsers(), 60 * 60 * 1000);
@@ -93,6 +95,10 @@ app.get('/signup', (req, res) => {
     res.render('register', { csrfToken: req.csrfToken() });
 })
 
+app.get('/reset-password', (req, res) => {
+    res.render('reset_password', { csrfToken: req.csrfToken() });
+})
+
 //sockets
 
 //my approach
@@ -106,7 +112,7 @@ app.get('/signup', (req, res) => {
 
 //     //display chats
 //     socket.emit('chats', getAllChats());
-// });
+// });e
 
 // course
 // Run when client connects
