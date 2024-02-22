@@ -188,3 +188,19 @@ document.getElementById('log__out').addEventListener('click', function(){
     localStorage.removeItem('token');
     window.location.href = '/login.html';
 })
+
+async function sidebar_users(){
+    var url = '';
+    var csrf_token = edit_form._csrf.value;
+    var response = await fetch(url, {
+        headers: {
+            'X-CSRF-Token': csrf_token,
+            'Authorization': `Token ${localStorage.getItem('token')}`
+        },
+        method: 'GET'
+    });
+    var response_data = await response.json()
+    console.log(response_data);
+}
+
+sidebar_settings();
