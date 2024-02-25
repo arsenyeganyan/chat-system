@@ -10,6 +10,7 @@ var chat_box_header_settings = document.getElementById('chat__box__header__setti
 var profile__picture__label =  document.getElementById('profile__picture__label');
 var change_password = document.getElementById('change__password');
 var change_password_form = document.getElementById('change__password__form');
+var chat_users = document.getElementById('chat__users');
 
 change_password_form.addEventListener('submit', async function(event){
     event.preventDefault();
@@ -190,17 +191,36 @@ document.getElementById('log__out').addEventListener('click', function(){
 })
 
 async function sidebar_users(){
-    var url = '';
-    var csrf_token = edit_form._csrf.value;
-    var response = await fetch(url, {
-        headers: {
-            'X-CSRF-Token': csrf_token,
-            'Authorization': `Token ${localStorage.getItem('token')}`
-        },
-        method: 'GET'
-    });
-    var response_data = await response.json()
-    console.log(response_data);
+    try {
+        var url = '';
+        var csrf_token = edit_form._csrf.value;
+        var response = await fetch(url, {
+            headers: {
+                'X-CSRF-Token': csrf_token,
+                'Authorization': `Token ${localStorage.getItem('token')}`
+            },
+            method: 'GET'
+        });
+        var response_data = await response.json();
+        chat_users.innerHTML = '';
+        for(var i = 0; i < response_data.length; i++){
+            chat_users.innerHTML +=  `
+                <div class="chat__user">
+                    <div class="user__profile__picture__container">
+                        <img src="${response_data[i].person.image}" class="user__profile__picture" alt="Profile Picture">
+                    </div>
+                    <div class="user__detail__data">
+                        <div class="name__and__date">
+                            <div class="username">${response_data[i].msgObj.sender.name}</div>
+                            <div class="last__message__date">${response_data[i].msgObj.date}</div>
+                        </div>
+                        <div class="last__message">${response_data[i].msgObj.text}</div>
+                    </div>
+                </div>`;
+        }
+    } catch(error) {
+        console.log(error);
+    }
 }
 
-sidebar_settings();
+sidebar_users();
